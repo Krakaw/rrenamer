@@ -25,8 +25,8 @@ impl InputFile {
         let re = regex::Regex::new(r"^(.*?)+\.?(\d{4})+.*?\.?([a-zA-Z0-9]{3,4})?$").unwrap();
         let caps = re.captures(&file_name);
 
-        let mut search;
-        let mut year;
+        let search;
+        let year;
         if let Some(cap) = caps {
             search = format!("{}", cap.get(1).map(|m|m.as_str()).unwrap()).replace('.', " ");
             year = format!("{}", cap.get(2).map(|m|m.as_str()).unwrap()).replace('.', " ");
@@ -44,7 +44,7 @@ impl InputFile {
 
     pub fn rename_file(self) -> Result<PathBuf, RrenamerError> {
         let output_path = self.output_path()?;
-        std::fs::rename(self.input_path, output_path.clone());
+        std::fs::rename(self.input_path, output_path.clone())?;
         Ok(output_path)
     }
 

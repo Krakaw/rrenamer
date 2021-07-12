@@ -1,9 +1,6 @@
-use std::path::Path;
 use crate::error::RrenamerError;
 
-pub struct Tmdb {
-
-}
+pub struct Tmdb;
 
 impl Tmdb {
     pub async fn lookup(search: String, year:String) -> Result<String, RrenamerError> {
