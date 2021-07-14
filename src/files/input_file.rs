@@ -7,11 +7,34 @@ pub struct InputFile {
     pub movie_name: Option<String>,
 }
 
+#[derive(Debug, Copy, Clone)]
+pub enum FileTypes {
+    Movie,
+    Series,
+}
+
+impl Default for FileTypes {
+    fn default() -> Self {
+        Self::Movie
+    }
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct FileParts {
+    pub file_type: FileTypes,
+    pub name: String,
+    pub year: Option<String>,
+    pub season: Option<String>,
+    pub episode: Option<String>,
+    pub title: Option<String>,
+    pub ext: String,
+}
+
 impl InputFile {
-    pub fn new (path: &str)-> Result<InputFile, RrenamerError> {
+    pub fn new(path: &str) -> Result<InputFile, RrenamerError> {
         Ok(InputFile {
             input_path: Path::new(path).to_path_buf(),
-            movie_name: None
+            movie_name: None,
         })
     }
 
@@ -19,21 +42,39 @@ impl InputFile {
         self.movie_name = Some(movie_name);
     }
 
-    pub fn lookup_parts(&self) -> Result<(String, String, String), RrenamerError> {
+    pub fn lookup_parts(&self) -> Result<FileParts, RrenamerError> {
         let file_name = self.input_path.file_stem().ok_or(InvalidFilename)?.to_string_lossy();
         let ext = self.input_path.extension().ok_or(InvalidFilename)?.to_string_lossy();
-        let re = regex::Regex::new(r"^(.*?)+\.?(\d{4})+.*?\.?([a-zA-Z0-9]{3,4})?$").unwrap();
-        let caps = re.captures(&file_name);
+        let movie_regex = regex::Regex::new(r"^(.*?)+\.?(\d{4})+.*?\.?([a-zA-Z0-9]{3,4})?$").unwrap();
+        let series_regex = regex::Regex::new(r"^(.*?)+\.?([sS]+(\d+)[eE]+(\d+))+.*?\.?([a-zA-Z0-9]{3,4})?$").unwrap();
 
-        let search;
-        let year;
-        if let Some(cap) = caps {
-            search = format!("{}", cap.get(1).map(|m|m.as_str()).unwrap()).replace('.', " ");
-            year = format!("{}", cap.get(2).map(|m|m.as_str()).unwrap()).replace('.', " ");
-        } else {
-            return Err(InvalidFilename);
+
+        if let Some(cap) = movie_regex.captures(&file_name) {
+            let name = format!("{}", cap.get(1).map(|m| m.as_str()).unwrap()).replace('.', " ");
+            let year = format!("{}", cap.get(2).map(|m| m.as_str()).unwrap()).replace('.', " ");
+            return Ok(FileParts {
+                name,
+                file_type: FileTypes::Movie,
+                year: Some(year),
+                ext: ext.to_string(),
+                ..Default::default()
+            });
         }
-        Ok((search, year, ext.into()))
+        if let Some(cap) = series_regex.captures(&file_name) {
+            eprintln!("cap = {:?}", cap);
+            let name = cap.get(1).and_then(|m| Some(m.as_str())).ok_or(InvalidFilename)?.to_string();
+            let episode = cap.get(3).and_then(|m| Some(m.as_str())).ok_or(InvalidFilename)?.to_string();
+            let season = cap.get(4).and_then(|m| Some(m.as_str())).ok_or(InvalidFilename)?.to_string();
+            return Ok(FileParts {
+                name,
+                episode: Some(episode),
+                season: Some(season),
+                file_type: FileTypes::Series,
+                ..Default::default()
+            });
+        }
+
+        return Err(InvalidFilename);
     }
 
     pub fn output_path(&self) -> Result<PathBuf, RrenamerError> {
@@ -47,8 +88,4 @@ impl InputFile {
         std::fs::rename(self.input_path, output_path.clone())?;
         Ok(output_path)
     }
-
-
-
-
 }

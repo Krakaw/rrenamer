@@ -1,4 +1,5 @@
 use thiserror::Error;
+use std::num::ParseIntError;
 
 #[derive(Error, Debug)]
 pub enum RrenamerError {
@@ -10,4 +11,6 @@ pub enum RrenamerError {
     ApiError(#[from] reqwest::Error),
     #[error(transparent)]
     IOError(#[from] std::io::Error),
+    #[error(transparent)]
+    ParseIntError(#[from] ParseIntError),
 }

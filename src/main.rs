@@ -55,8 +55,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("Checking file: {}", value);
                 }
                 let mut input_file = InputFile::new(value)?;
-                let (search, year, _ext) = input_file.lookup_parts()?;
-                let name_results = Tmdb::lookup(search, year).await?;
+                let file_parts = input_file.lookup_parts()?;
+                let name_results = Tmdb::lookup(file_parts).await?;
                 let name_result;
                 if prompt {
                     println!("Choose a result for {}:\n{}", value, name_results);
