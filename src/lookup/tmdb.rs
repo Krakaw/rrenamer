@@ -15,12 +15,12 @@ impl Tmdb {
 
     pub async fn lookup_series(file_parts: &FileParts) -> Result<TmdbResults, RrenamerError> {
         let search = file_parts.name.clone();
-        let season = file_parts
+        let _season = file_parts
             .season
             .as_ref()
             .unwrap_or(&"".to_string())
             .clone();
-        let episode = file_parts
+        let _episode = file_parts
             .episode
             .as_ref()
             .unwrap_or(&"".to_string())
@@ -35,7 +35,6 @@ impl Tmdb {
         .json::<serde_json::Value>()
         .await?;
 
-        eprintln!("r = {:?}", r);
         let results = r
             .get("results")
             .ok_or(MovieNotFound)?

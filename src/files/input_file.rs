@@ -1,5 +1,5 @@
 use crate::error::RrenamerError;
-use crate::error::RrenamerError::{InvalidFilename, InvalidPath, MovieNotFound};
+use crate::error::RrenamerError::{InvalidPath, MovieNotFound};
 use crate::files::file_parts::FileParts;
 use std::convert::TryFrom;
 use std::path::{Path, PathBuf};
