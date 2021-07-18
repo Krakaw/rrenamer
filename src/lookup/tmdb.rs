@@ -2,7 +2,6 @@ use crate::error::RrenamerError;
 use crate::error::RrenamerError::MovieNotFound;
 use crate::files::file_parts::{FileParts, FileTypes};
 use crate::lookup::tmdb_results::{TmdbResult, TmdbResults};
-use std::marker::PhantomData;
 
 pub struct Tmdb;
 

@@ -2,7 +2,6 @@ use crate::error::RrenamerError;
 use crate::error::RrenamerError::{InvalidFileExt, InvalidFilename};
 use std::convert::TryFrom;
 use std::path::Path;
-use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone)]
 pub enum FileTypes {

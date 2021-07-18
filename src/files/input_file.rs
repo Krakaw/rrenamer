@@ -1,9 +1,8 @@
 use crate::error::RrenamerError;
-use crate::error::RrenamerError::{InvalidFileExt, InvalidFilename, InvalidPath, MovieNotFound};
+use crate::error::RrenamerError::{InvalidFilename, InvalidPath, MovieNotFound};
 use crate::files::file_parts::FileParts;
 use std::convert::TryFrom;
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
 pub struct InputFile {
     pub input_file_parts: FileParts,
     pub output_dir: Option<PathBuf>,
