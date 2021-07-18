@@ -7,6 +7,7 @@ use clap::{App, Arg};
 use crate::files::input_file::InputFile;
 use crate::lookup::tmdb::Tmdb;
 use crate::lookup::tmdb_results::TmdbResult;
+use std::path::PathBuf;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -40,21 +41,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .long("prompt")
                     .about("Show options and prompt for input")
             )
+            .arg(
+                Arg::new("move")
+                    .short('m')
+                    .long("move")
+                    .takes_value(true)
+                    .about("Move the files to another directory")
+            )
         )
         .get_matches();
 
+
     let verbosity = matches.occurrences_of("v");
+    let dry_run = matches.is_present("dry-run");
     // You can get the independent subcommand matches (which function exactly like App matches)
     if let Some(ref matches) = matches.subcommand_matches("rename") {
         let prompt = matches.is_present("prompt");
         // You can check the value provided by positional arguments, or option arguments
         if let Some(values) = matches.values_of("rename") {
-            let dry_run = matches.is_present("dry-run");
             for value in values {
                 if verbosity > 0 {
                     println!("Checking file: {}", value);
                 }
-                let mut input_file = InputFile::new(value)?;
+                let mut input_file = InputFile::new(value, matches.value_of("move").map(|f|PathBuf::from(f)))?;
                 let file_parts = input_file.lookup_parts()?;
                 let name_results = Tmdb::lookup(file_parts).await?;
                 let name_result;

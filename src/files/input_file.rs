@@ -1,10 +1,11 @@
 use std::path::{Path, PathBuf};
 use crate::error::RrenamerError;
-use crate::error::RrenamerError::{InvalidFilename, MovieNotFound};
+use crate::error::RrenamerError::{InvalidFilename, MovieNotFound, InvalidFileExt, InvalidPath};
 
 pub struct InputFile {
     pub input_path: PathBuf,
     pub movie_name: Option<String>,
+    pub output_dir: Option<PathBuf>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -31,10 +32,11 @@ pub struct FileParts {
 }
 
 impl InputFile {
-    pub fn new(path: &str) -> Result<InputFile, RrenamerError> {
+    pub fn new(path: &str, output_dir: Option<PathBuf>) -> Result<InputFile, RrenamerError> {
         Ok(InputFile {
             input_path: Path::new(path).to_path_buf(),
             movie_name: None,
+            output_dir,
         })
     }
 
@@ -78,8 +80,10 @@ impl InputFile {
     }
 
     pub fn output_path(&self) -> Result<PathBuf, RrenamerError> {
-        let ext = self.input_path.extension().ok_or(InvalidFilename)?.to_string_lossy();
-        let output = self.input_path.parent().ok_or(InvalidFilename)?.join(format!("{}.{}", self.movie_name.as_ref().ok_or(MovieNotFound)?, ext));
+        let ext = self.input_path.extension().ok_or(InvalidFileExt("".to_string()))?.to_string_lossy();
+        let input_parent = &self.input_path.parent().ok_or(InvalidPath("".to_string()))?.to_path_buf();
+        let parent = self.output_dir.as_ref().unwrap_or_else(|| input_parent);
+        let output = parent.join(format!("{}.{}", self.movie_name.as_ref().ok_or(MovieNotFound)?, ext));
         Ok(output)
     }
 
